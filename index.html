@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GIIT Fee Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-inner">
+        <div class="header-logo">🎓</div>
+        <div>
+            <h1>Global Institute of Information & Technology</h1>
+            <p>Student Fee Management Portal</p>
+        </div>
+    </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="screen active">
+    <div class="screen-icon">🔐</div>
+    <h3>Student Login</h3>
+    <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input id="studentId" placeholder="Student ID">
+    </div>
+    <div class="input-wrap">
+        <span class="input-icon">📱</span>
+        <input id="mobile" placeholder="Mobile Number" type="number">
+    </div>
+    <button class="btn btn-primary" onclick="studentLogin()">Login as Student</button>
+    <button class="btn btn-secondary" onclick="showScreen('adminLoginScreen')">Admin Login</button>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminLoginScreen" class="screen">
+    <button class="back-btn" onclick="goBack('loginScreen')">⬅ Back</button>
+    <div class="screen-icon">👨‍💼</div>
+    <h3>Admin Login</h3>
+    <div class="input-wrap">
+        <span class="input-icon">📱</span>
+        <input id="adminMobile" placeholder="Mobile Number">
+    </div>
+    <div class="input-wrap">
+        <span class="input-icon">🔑</span>
+        <input id="adminPassword" placeholder="Password" type="password">
+    </div>
+    <button class="btn btn-danger" onclick="adminLogin()">Login as Admin</button>
+</div>
+
+<!-- STUDENT DASHBOARD -->
+<div id="studentDashboard" class="screen">
+    <button class="back-btn" onclick="goBack('loginScreen')">⬅ Back</button>
+    <div class="student-header">
+        <div class="student-avatar" id="studentAvatar">A</div>
+        <div>
+            <h3 id="studentName">Student</h3>
+            <span class="badge" id="studentCourse">BCA</span>
+            <span class="badge badge-sem" id="studentSem">Sem 1</span>
+        </div>
+    </div>
+
+    <div class="fee-grid">
+        <div class="fee-card fee-total">
+            <div class="fee-label">💰 Total Fee</div>
+            <div class="fee-amount">₹<span id="totalFees">0</span></div>
+        </div>
+        <div class="fee-card fee-paid">
+            <div class="fee-label">✅ Paid</div>
+            <div class="fee-amount">₹<span id="paidFees">0</span></div>
+        </div>
+        <div class="fee-card fee-pending">
+            <div class="fee-label">⏳ Pending</div>
+            <div class="fee-amount">₹<span id="pendingFees">0</span></div>
+        </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+        <div class="progress-label">
+            <span>Fee Paid</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-wrap">
+        <canvas id="feeChart" height="180"></canvas>
+    </div>
+
+    <button class="btn btn-success" onclick="openPayment()">💳 Pay Now</button>
+
+    <!-- AI Assistant Button -->
+    <button class="btn btn-ai" onclick="openAIChat()">🤖 Ask AI Assistant</button>
+
+    <h4 class="section-title">📜 Payment History</h4>
+    <div id="historyList"></div>
+</div>
+
+<!-- PAYMENT -->
+<div id="paymentModal" class="screen">
+    <button class="back-btn" onclick="goBack('studentDashboard')">⬅ Back</button>
+    <div class="screen-icon">💳</div>
+    <h3>Make Payment</h3>
+
+    <div class="qr-box">
+        <img src="https://iili.io/B8DynWP.png">
+        <div class="upi-info">
+            <p>📱 <b>9334777278</b></p>
+            <p>💳 <b>9334777278@ybl</b></p>
+            <button class="btn btn-outline" onclick="copyUPI()">📋 Copy UPI ID</button>
+        </div>
+    </div>
+
+    <div class="input-wrap">
+        <span class="input-icon">₹</span>
+        <input id="payAmount" placeholder="Enter Amount" type="number">
+    </div>
+    <div class="input-wrap">
+        <span class="input-icon">🔖</span>
+        <input id="txnInput" placeholder="Transaction ID">
+    </div>
+    <button class="btn btn-success" onclick="submitPayment()">✅ Submit Payment</button>
+</div>
+
+<!-- AI CHAT SCREEN -->
+<div id="aiChatScreen" class="screen">
+    <button class="back-btn" onclick="goBack('studentDashboard')">⬅ Back</button>
+    <div class="screen-icon">🤖</div>
+    <h3>AI Fee Assistant</h3>
+    <p style="text-align:center;font-size:12px;color:#64748b;margin-bottom:14px;">Apne fees ke baare mein kuch bhi pucho!</p>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-suggestions">
+        <button class="suggestion-chip" onclick="askSuggestion('Mera kitna fee baki hai?')">💬 Kitna fee baki hai?</button>
+        <button class="suggestion-chip" onclick="askSuggestion('Mujhe payment kaise karni hai?')">💬 Payment kaise karein?</button>
+        <button class="suggestion-chip" onclick="askSuggestion('Mera payment history dikhao')">💬 Payment history</button>
+    </div>
+
+    <div class="chat-input-row">
+        <div class="input-wrap" style="margin:0;flex:1;">
+            <span class="input-icon">💬</span>
+            <input id="chatInput" placeholder="Message likho..." onkeypress="if(event.key==='Enter') sendChat()">
+        </div>
+        <button class="send-btn" onclick="sendChat()">➤</button>
+    </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminDashboard" class="screen">
+    <button class="back-btn" onclick="goBack('loginScreen')">⬅ Back</button>
+
+    <div class="admin-header">
+        <h3>👨‍💼 Admin Panel</h3>
+        <div class="notif-wrap">
+            <button class="notif-btn" onclick="toggleNotification()">
+                🔔 <span class="notif-badge" id="notifyCount">0</span>
+            </button>
+            <div id="notificationBox" class="notif-box hidden"></div>
+        </div>
+    </div>
+
+    <!-- Admin Stats -->
+    <div class="admin-stats" id="adminStats"></div>
+
+    <!-- Admin Chart -->
+    <div class="chart-wrap">
+        <canvas id="adminChart" height="200"></canvas>
+    </div>
+
+    <button class="btn btn-primary" onclick="showScreen('addStudentScreen')">➕ Add Student</button>
+    <button class="btn btn-ai" onclick="openAdminAI()">🤖 AI Analytics Assistant</button>
+
+    <div class="input-wrap" style="margin-top:12px;">
+        <span class="input-icon">🔍</span>
+        <input id="searchInput" placeholder="Search by ID, mobile, course…" oninput="searchStudents()">
+    </div>
+
+    <div id="studentList"></div>
+</div>
+
+<!-- ADMIN AI CHAT -->
+<div id="adminAIScreen" class="screen">
+    <button class="back-btn" onclick="goBack('adminDashboard')">⬅ Back</button>
+    <div class="screen-icon">🤖</div>
+    <h3>AI Analytics Assistant</h3>
+    <p style="text-align:center;font-size:12px;color:#64748b;margin-bottom:14px;">Fee data ke baare mein kuch bhi pucho!</p>
+
+    <div id="adminChatMessages" class="chat-messages"></div>
+
+    <div class="chat-suggestions">
+        <button class="suggestion-chip" onclick="askAdminSuggestion('Total collection kitni hai?')">💬 Total collection</button>
+        <button class="suggestion-chip" onclick="askAdminSuggestion('Sabse zyada pending fee kis student ki hai?')">💬 Max pending</button>
+        <button class="suggestion-chip" onclick="askAdminSuggestion('Course-wise fee summary do')">💬 Course summary</button>
+    </div>
+
+    <div class="chat-input-row">
+        <div class="input-wrap" style="margin:0;flex:1;">
+            <span class="input-icon">💬</span>
+            <input id="adminChatInput" placeholder="Message likho..." onkeypress="if(event.key==='Enter') sendAdminChat()">
+        </div>
+        <button class="send-btn" onclick="sendAdminChat()">➤</button>
+    </div>
+</div>
+
+<!-- ADD STUDENT -->
+<div id="addStudentScreen" class="screen">
+    <button class="back-btn" onclick="goBack('adminDashboard')">⬅ Back</button>
+    <div class="screen-icon">➕</div>
+    <h3>Add New Student</h3>
+
+    <div class="input-wrap">
+        <span class="input-icon">🆔</span>
+        <input id="newId" placeholder="Student ID">
+    </div>
+    <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input id="newName" placeholder="Student Name">
+    </div>
+    <div class="input-wrap">
+        <span class="input-icon">📱</span>
+        <input id="newMobile" placeholder="Mobile Number" type="number">
+    </div>
+    <div class="input-wrap">
+        <span class="input-icon">₹</span>
+        <input id="newTotal" placeholder="Total Fee" type="number">
+    </div>
+
+    <select id="newCourse" class="select-input">
+        <option>BCA</option>
+        <option>BBA</option>
+        <option>B.Com</option>
+        <option>MBA</option>
+        <option>MCA</option>
+        <option>BA</option>
+    </select>
+
+    <select id="newSem" class="select-input">
+        <option>Sem 1</option>
+        <option>Sem 2</option>
+        <option>Sem 3</option>
+        <option>Sem 4</option>
+        <option>Sem 5</option>
+        <option>Sem 6</option>
+    </select>
+
+    <button class="btn btn-primary" onclick="addStudent()">💾 Save Student</button>
+</div>
+
+<!-- FIREBASE (v8 compat) — No console needed -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAHJCB4BkkwKOCiVE__aJvndBRiWOZF-4",
+  authDomain: "fee-app-e6265.firebaseapp.com",
+  projectId: "fee-app-e6265"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+<script src="script.js"></script>
+</body>
+</html>
