@@ -5,7 +5,7 @@ let adminChartInstance = null;
 let allStudentsCache = [];
 
 // ── Gemini AI Config ──────────────────────────────────────────────────────────
-const GEMINI_API_KEY = "AIzaSyBRRFyhWRdQ0EHUdKhMBzcmwuzaqjvmEiA";
+const GEMINI_API_KEY = "AIzaSyC-FlOO_7KmHnWqd83UcKcPdq7961y27t8";
 const GEMINI_URL =`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
 // ── UI ────────────────────────────────────────────────────────────────────────
